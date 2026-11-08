@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BookingBarumba - Sewa Lapangan Online</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                DEFAULT: "#0061f2",
+                dark: "#0043c5",
+                light: "#3385ff",
+                bg: "#f0f4ff",
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      @keyframes btnProgress {
+        0% {
+          width: 0%;
+        }
+        100% {
+          width: 100%;
+        }
+      }
+      .animate-progress {
+        animation: btnProgress 1.5s infinite linear;
+      }
+      /* Efek halus latar belakang */
+      body {
+        background: linear-gradient(135deg, #f0f4ff 0%, #e1ebff 100%);
+      }
+    </style>
+  </head>
+  <body class="text-slate-800 min-h-screen flex flex-col font-sans">
+    <!-- Splash / Loading Screen -->
+    <div
+      id="loading-screen"
+      class="fixed inset-0 bg-white/95 backdrop-blur-md z-[9999] flex flex-col justify-center items-center"
+    >
+      <div class="text-center animate-pulse">
+        <img
+          src="image/LogoBarumba.jpeg"
+          alt="Logo Barumba"
+          class="w-28 h-28 object-contain mx-auto mb-4 rounded-full shadow-lg border-4 border-blue-100"
+        />
+        <h1 class="text-2xl font-black text-brand tracking-wider">
+          BOOKINGBARUMBA
+        </h1>
+        <p class="text-xs text-slate-400 mt-1 font-medium">
+          Memuat ketersediaan jadwal...
+        </p>
+      </div>
+      <div
+        class="w-48 h-2 bg-blue-100 rounded-full overflow-hidden mt-6 shadow-inner"
+      >
+        <div
+          id="progress-bar"
+          class="h-full bg-gradient-to-r from-brand-light to-brand w-0 transition-all duration-300 rounded-full"
+        ></div>
+      </div>
+    </div>
+
+    <!-- Modal Pop-Up Alert -->
+    <div
+      id="modal-alert"
+      class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[999] hidden flex justify-center items-center p-4"
+    >
+      <div
+        class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl text-center border border-blue-50 transform transition-all scale-100"
+      >
+        <div
+          id="modal-icon"
+          class="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center mb-4 bg-red-50 text-red-500 font-bold text-2xl shadow-sm"
+        >
+          !
+        </div>
+        <h3 id="modal-title" class="text-lg font-bold text-slate-800 mb-2">
+          Pemberitahuan
+        </h3>
+        <p
+          id="modal-message"
+          class="text-sm text-slate-600 mb-6 leading-relaxed"
+        >
+          Pesan error...
+        </p>
+        <button
+          onclick="closeModal()"
+          class="w-full py-3 bg-gradient-to-r from-brand to-brand-light hover:from-brand-dark hover:to-brand text-white font-semibold rounded-2xl transition-all shadow-md shadow-blue-500/20 active:scale-[0.98]"
+        >
+          Tutup
+        </button>
+      </div>
+    </div>
+
+    <!-- Navbar dengan Efek Kaca (Glassmorphism) -->
+    <header
+      class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-blue-100/50"
+    >
+      <div
+        class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between"
+      >
+        <div class="flex items-center gap-3">
+          <img
+            src="image/LogoBarumba.jpeg"
+            alt="Logo"
+            class="w-10 h-10 object-contain rounded-full shadow-sm border border-blue-100"
+          />
+          <div>
+            <h1 class="text-lg font-black text-brand tracking-tight">
+              BookingBarumba
+            </h1>
+            <p
+              class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider"
+            >
+              Sewa Lapangan Barumba
+            </p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Container Utama -->
+    <main class="max-w-6xl mx-auto px-4 py-8 w-full flex-grow">
+      <!-- Screen Tutup -->
+      <div
+        id="closed-screen"
+        class="hidden bg-white rounded-3xl p-8 shadow-xl text-center border border-red-100 max-w-lg mx-auto my-12"
+      >
+        <div
+          class="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl font-bold shadow-sm"
+        >
+          ×
+        </div>
+        <h2 class="text-xl font-bold text-slate-800 mb-2">
+          Layanan Booking Tutup
+        </h2>
+        <p class="text-slate-500 text-sm leading-relaxed">
+          Mohon maaf, pemesanan lapangan online Barumba sedang ditutup untuk
+          sementara waktu hari ini. Silakan kunjungi kembali esok hari.
+        </p>
+      </div>
+
+      <!-- Form Booking (Responsive Layout Grid) -->
+      <form
+        id="booking-form"
+        class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"
+      >
+        <!-- Kolom Kiri: Form Input -->
+        <div
+          class="lg:col-span-7 bg-white/90 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-xl shadow-blue-900/5 border border-white space-y-5"
+        >
+          <div
+            class="flex items-center justify-between border-b border-slate-100 pb-4"
+          >
+            <h2
+              class="text-base font-black text-slate-800 border-l-4 border-brand pl-3 uppercase tracking-wide"
+            >
+              Identitas & Jadwal Pemesanan
+            </h2>
+          </div>
+
+          <div>
+            <label
+              class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider"
+              >Nama Pemesan</label
+            >
+            <input
+              type="text"
+              id="nama"
+              class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand focus:bg-white transition-all shadow-sm"
+              placeholder="Masukkan Nama Lengkap / Tim / Club"
+              required
+            />
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label
+                class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider"
+                >Tanggal Booking</label
+              >
+              <input
+                type="date"
+                id="tanggal"
+                class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand focus:bg-white transition-all shadow-sm font-medium"
+                required
+              />
+            </div>
+            <div>
+              <label
+                class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider"
+                >Kategori Waktu</label
+              >
+              <select
+                id="kategori"
+                class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand focus:bg-white transition-all shadow-sm font-medium cursor-pointer"
+                required
+              >
+                <option value="siang">☀️ Siang (07:00 - 18:00)</option>
+                <option value="malam">🌙 Malam (18:00 - 23:00)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label
+                class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider"
+                >Jam Mulai</label
+              >
+              <select
+                id="jamMulai"
+                class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand focus:bg-white transition-all shadow-sm font-medium cursor-pointer"
+                required
+              ></select>
+            </div>
+            <div>
+              <label
+                class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider"
+                >Lama Sewa (Jam)</label
+              >
+              <select
+                id="durasi"
+                class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand focus:bg-white transition-all shadow-sm font-medium cursor-pointer"
+                required
+              >
+                <option value="1">1 Jam</option>
+                <option value="2">2 Jam</option>
+                <option value="3">3 Jam</option>
+                <option value="4">4 Jam</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label
+              class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider"
+              >Jam Selesai (Otomatis)</label
+            >
+            <input
+              type="text"
+              id="jamSelesai"
+              class="w-full px-4 py-3 bg-blue-50/50 border border-blue-100 rounded-2xl text-sm font-bold text-brand shadow-inner"
+              readonly
+            />
+          </div>
+
+          <div>
+            <label
+              class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider"
+              >Catatan Tambahan (Opsional)</label
+            >
+            <input
+              type="text"
+              id="catatan"
+              class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand focus:bg-white transition-all shadow-sm"
+              placeholder="Contoh: Sewa sepatu / rompi tambahan"
+            />
+          </div>
+
+          <!-- Price Box dengan Gradasi Modern -->
+          <div
+            class="bg-gradient-to-br from-blue-500 to-brand rounded-2xl p-5 text-center text-white shadow-lg shadow-blue-500/25 mt-4"
+          >
+            <span
+              class="text-xs text-blue-100 font-semibold uppercase tracking-widest block mb-1"
+              >Total Biaya Pemesanan</span
+            >
+            <span id="totalHarga" class="text-3xl font-black tracking-tight"
+              >Rp 0</span
+            >
+          </div>
+        </div>
+
+        <!-- Kolom Kanan: Preview Jadwal & Submit -->
+        <div class="lg:col-span-5 space-y-6">
+          <div
+            class="bg-white/90 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-xl shadow-blue-900/5 border border-white"
+          >
+            <div
+              class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4"
+            >
+              <h2
+                class="text-base font-black text-slate-800 border-l-4 border-brand pl-3 uppercase tracking-wide"
+              >
+                Status Jadwal
+              </h2>
+            </div>
+
+            <div
+              id="preview-schedule"
+              class="space-y-2.5 max-h-80 overflow-y-auto pr-1"
+            >
+              <div
+                class="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-500 text-center font-medium"
+              >
+                Memuat jadwal...
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit Button dengan Gradient & Efek Interaktif -->
+          <button
+            type="submit"
+            id="btn-submit"
+            class="relative w-full overflow-hidden bg-gradient-to-r from-brand to-brand-light hover:from-brand-dark hover:to-brand text-white font-black py-4 px-6 rounded-2xl shadow-xl shadow-blue-600/30 transition-all transform active:scale-[0.99] disabled:from-slate-300 disabled:to-slate-300 disabled:shadow-none disabled:cursor-not-allowed"
+          >
+            <div
+              id="btn-progress"
+              class="hidden absolute top-0 left-0 bottom-0 bg-white/20 animate-progress"
+            ></div>
+            <span
+              id="btn-text"
+              class="relative z-10 flex items-center justify-center gap-2 text-base"
+            >
+              <span>Kirim Booking via WhatsApp</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M14 5l7 7m0 0l-7 7m7-7H3"
+                />
+              </svg>
+            </span>
+          </button>
+        </div>
+      </form>
+    </main>
+
+    <!-- Footer Minimalis -->
+    <footer class="py-6 text-center text-xs text-slate-400 font-medium">
+      &copy; 2026 BookingBarumba. All rights reserved.
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>

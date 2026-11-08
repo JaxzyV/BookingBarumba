@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - BookingBarumba</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                DEFAULT: "#0061f2",
+                dark: "#0043c5",
+                light: "#3385ff",
+                sky: "#e0edff",
+                bg: "#f0f4ff",
+                accent: "#111827", // Aksen hitam sporty modern
+              },
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-brand-bg text-slate-900 min-h-screen flex flex-col font-sans">
+    <!-- Toast Notification Melayang Modern -->
+    <div
+      id="toast"
+      class="fixed top-5 right-5 z-[999] transform translate-y-[-150%] opacity-0 transition-all duration-300 max-w-sm bg-brand-accent text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 text-sm border border-slate-800"
+    >
+      <span id="toast-icon">ℹ️</span>
+      <span id="toast-message">Pesan notifikasi...</span>
+    </div>
+
+    <!-- Navbar Admin -->
+    <header
+      class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-blue-100"
+    >
+      <div
+        class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center"
+      >
+        <div class="flex items-center gap-3">
+          <!-- Logo diganti menggunakan tag img dengan style wadah yang tetap konsisten -->
+          <img
+            src="image/LogoBarumba.jpeg"
+            alt="Logo Barumba"
+            class="w-10 h-10 object-contain rounded-2xl shadow-md shadow-blue-500/20 border border-blue-100 bg-white"
+          />
+          <div>
+            <h1 class="text-base font-black text-brand-accent tracking-tight">
+              Admin Dashboard
+            </h1>
+            <p
+              class="text-[10px] text-slate-400 font-bold uppercase tracking-wider"
+            >
+              BookingBarumba Control
+            </p>
+          </div>
+        </div>
+        <a
+          href="index.html"
+          target="_blank"
+          class="text-xs font-bold text-brand bg-blue-50 hover:bg-blue-100 px-3.5 py-2 rounded-xl transition-all border border-blue-100"
+          >Lihat Halaman Booking →</a
+        >
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-5xl mx-auto px-4 py-8 w-full flex-grow space-y-6">
+      <!-- Statistik Ringkas Hari Ini -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div
+          class="bg-white rounded-3xl p-6 shadow-xl shadow-blue-900/5 border border-white flex items-center justify-between"
+        >
+          <div>
+            <span
+              class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1"
+              >Total Booking Hari Ini</span
+            >
+            <h3
+              id="stat-total-booking"
+              class="text-3xl font-black text-brand-accent"
+            >
+              0
+            </h3>
+          </div>
+          <div
+            class="w-14 h-14 bg-blue-50 text-brand rounded-2xl flex items-center justify-center text-2xl font-bold shadow-inner"
+          >
+            📅
+          </div>
+        </div>
+        <div
+          class="bg-white rounded-3xl p-6 shadow-xl shadow-blue-900/5 border border-white flex items-center justify-between"
+        >
+          <div>
+            <span
+              class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1"
+              >Status Operasional</span
+            >
+            <h3
+              id="stat-status-toko"
+              class="text-lg font-black text-emerald-600"
+            >
+              OPEN
+            </h3>
+          </div>
+          <button
+            onclick="toggleStatusToko()"
+            id="btn-toggle-toko"
+            class="px-4 py-2.5 bg-brand-accent hover:bg-black text-white text-xs font-bold rounded-xl transition shadow-md"
+          >
+            Ubah Status
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabel Rincian Booking Hari Ini -->
+      <div
+        class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl shadow-blue-900/5 border border-white"
+      >
+        <div
+          class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3"
+        >
+          <h2
+            class="text-sm font-black text-brand-accent border-l-4 border-brand pl-3 uppercase tracking-wide"
+          >
+            Daftar Booking Hari Ini
+          </h2>
+          <span
+            class="text-[11px] font-bold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-lg"
+            >Real-time Data</span
+          >
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr
+                class="bg-slate-50/80 text-slate-400 uppercase tracking-wider border-b border-slate-100"
+              >
+                <th class="p-3.5 font-bold">Nama Pemesan</th>
+                <th class="p-3.5 font-bold">Waktu / Jam</th>
+                <th class="p-3.5 font-bold">Kategori</th>
+                <th class="p-3.5 font-bold">Durasi</th>
+                <th class="p-3.5 font-bold">Nominal</th>
+              </tr>
+            </thead>
+            <tbody id="table-bookings-body">
+              <tr>
+                <td
+                  colspan="5"
+                  class="p-6 text-center text-slate-400 font-medium"
+                >
+                  Memuat data...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Kartu Pengaturan Detail (Harga, Jam, & Nomor WA) -->
+      <div
+        class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl shadow-blue-900/5 border border-white"
+      >
+        <div class="border-b border-slate-100 pb-3 mb-6">
+          <h2
+            class="text-sm font-black text-brand-accent border-l-4 border-brand pl-3 uppercase tracking-wide"
+          >
+            Pengaturan Sistem & Harga
+          </h2>
+        </div>
+
+        <form id="settings-form" class="space-y-4">
+          <div>
+            <label
+              class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider"
+              >Nomor WhatsApp Tujuan Admin (Format 62)</label
+            >
+            <input
+              type="text"
+              id="ADMIN_WA_NUMBER"
+              class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand focus:bg-white transition-all shadow-sm font-medium"
+              required
+            />
+            <span class="text-[10px] text-slate-400 mt-1 block"
+              >Contoh: 6285331885155 (Tanpa tanda + atau spasi)</span
+            >
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label
+                class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider"
+                >Harga Siang (Rp / Jam)</label
+              >
+              <input
+                type="number"
+                id="HARGA_SIANG"
+                class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:bg-white transition-all shadow-sm font-medium"
+                required
+              />
+            </div>
+            <div>
+              <label
+                class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider"
+                >Harga Malam (Rp / Jam)</label
+              >
+              <input
+                type="number"
+                id="HARGA_MALAM"
+                class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:bg-white transition-all shadow-sm font-medium"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+            <div>
+              <label
+                class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider"
+                >Buka Siang</label
+              >
+              <input
+                type="number"
+                id="JAM_BUKA_SIANG"
+                class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:bg-white font-medium"
+                required
+              />
+            </div>
+            <div>
+              <label
+                class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider"
+                >Tutup Siang</label
+              >
+              <input
+                type="number"
+                id="JAM_TUTUP_SIANG"
+                class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:bg-white font-medium"
+                required
+              />
+            </div>
+            <div>
+              <label
+                class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider"
+                >Buka Malam</label
+              >
+              <input
+                type="number"
+                id="JAM_BUKA_MALAM"
+                class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:bg-white font-medium"
+                required
+              />
+            </div>
+            <div>
+              <label
+                class="block text-xs font-bold text-slate-600 mb-1.5 uppercase tracking-wider"
+                >Tutup Malam</label
+              >
+              <input
+                type="number"
+                id="JAM_TUTUP_MALAM"
+                class="w-full px-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:bg-white font-medium"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="pt-4">
+            <button
+              type="submit"
+              id="btn-save"
+              class="w-full py-4 bg-gradient-to-r from-brand to-brand-light hover:from-brand-dark hover:to-brand text-white font-black rounded-2xl transition shadow-xl shadow-blue-500/20 text-sm tracking-wide"
+            >
+              Simpan Perubahan Pengaturan
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-6 text-center text-xs text-slate-400 font-medium">
+      &copy; 2026 BookingBarumba Admin Panel. All rights reserved.
+    </footer>
+
+    <script>
+      const APPS_SCRIPT_URL =
+        "https://script.google.com/macros/s/AKfycbxZz_rkAy4pbNUrV73EoSVLA8CdoLwZ_rTcTRCDu8LCpDzG_UW_6oVc5rsMtrL0znHQ/exec"; // Ganti dengan URL deployment Web App Apps Script kamu
+
+      window.addEventListener("DOMContentLoaded", loadDashboardData);
+
+      async function loadDashboardData() {
+        try {
+          const res = await fetch(APPS_SCRIPT_URL);
+          const data = await res.json();
+
+          if (data.status === "success") {
+            const s = data.settings;
+
+            document.getElementById("ADMIN_WA_NUMBER").value =
+              s.adminWaNumber || "6285331885155";
+            document.getElementById("HARGA_SIANG").value = s.hargaSiang;
+            document.getElementById("HARGA_MALAM").value = s.hargaMalam;
+            document.getElementById("JAM_BUKA_SIANG").value = s.jamBukaSiang;
+            document.getElementById("JAM_TUTUP_SIANG").value = s.jamTutupSiang;
+            document.getElementById("JAM_BUKA_MALAM").value = s.jamBukaMalam;
+            document.getElementById("JAM_TUTUP_MALAM").value = s.jamTutupMalam;
+
+            const statusEl = document.getElementById("stat-status-toko");
+            statusEl.textContent = s.isClosed
+              ? "CLOSED (TUTUP)"
+              : "OPEN (BUKA)";
+            statusEl.className = s.isClosed
+              ? "text-lg font-black text-red-600"
+              : "text-lg font-black text-emerald-600";
+
+            renderTodayBookings(data.bookings || []);
+          }
+        } catch (err) {
+          showToast("Gagal memuat data dari server.", "error");
+        }
+      }
+
+      function renderTodayBookings(bookings) {
+        const todayISO = new Date().toISOString().split("T")[0];
+        const todayBookings = bookings.filter((b) => b.tanggal === todayISO);
+
+        document.getElementById("stat-total-booking").textContent =
+          todayBookings.length;
+
+        const tbody = document.getElementById("table-bookings-body");
+        tbody.innerHTML = "";
+
+        if (todayBookings.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400 font-medium">Belum ada booking untuk hari ini.</td></tr>`;
+          return;
+        }
+
+        todayBookings.forEach((b) => {
+          let tr = document.createElement("tr");
+          tr.className =
+            "border-b border-slate-50 hover:bg-blue-50/30 transition-colors";
+          tr.innerHTML = `
+          <td class="p-3.5 font-bold text-slate-800">${b.nama || "-"}</td>
+          <td class="p-3.5 text-slate-600 font-medium">${b.jamMulai} - ${b.jamSelesai}</td>
+          <td class="p-3.5 uppercase font-bold text-brand">${b.kategori || "-"}</td>
+          <td class="p-3.5 text-slate-600 font-medium">${b.durasi || 1} Jam</td>
+          <td class="p-3.5 font-black text-slate-900">${b.totalHarga || "Rp 0"}</td>
+        `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      async function toggleStatusToko() {
+        const statusEl = document.getElementById("stat-status-toko");
+        let newStatus = statusEl.textContent.includes("OPEN")
+          ? "CLOSED"
+          : "OPEN";
+        await saveSettingsToBackend({ STATUS_TOKO: newStatus });
+        loadDashboardData();
+      }
+
+      document
+        .getElementById("settings-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const payload = {
+            ADMIN_WA_NUMBER: document
+              .getElementById("ADMIN_WA_NUMBER")
+              .value.trim(),
+            HARGA_SIANG: document.getElementById("HARGA_SIANG").value,
+            HARGA_MALAM: document.getElementById("HARGA_MALAM").value,
+            JAM_BUKA_SIANG: document.getElementById("JAM_BUKA_SIANG").value,
+            JAM_TUTUP_SIANG: document.getElementById("JAM_TUTUP_SIANG").value,
+            JAM_BUKA_MALAM: document.getElementById("JAM_BUKA_MALAM").value,
+            JAM_TUTUP_MALAM: document.getElementById("JAM_TUTUP_MALAM").value,
+          };
+          await saveSettingsToBackend(payload);
+        });
+
+      async function saveSettingsToBackend(settingsObj) {
+        try {
+          const res = await fetch(APPS_SCRIPT_URL, {
+            method: "POST",
+            body: JSON.stringify({
+              action: "update_settings",
+              settings: settingsObj,
+            }),
+          });
+          const result = await res.json();
+          showToast(
+            result.message || "Pengaturan berhasil disimpan!",
+            "success",
+          );
+          loadDashboardData();
+        } catch (err) {
+          showToast("Gagal menyimpan perubahan.", "error");
+        }
+      }
+
+      function showToast(message, type = "success") {
+        const toast = document.getElementById("toast");
+        const msg = document.getElementById("toast-message");
+        const icon = document.getElementById("toast-icon");
+
+        msg.textContent = message;
+        icon.textContent = type === "success" ? "✅" : "⚠️";
+
+        toast.classList.remove("translate-y-[-150%]", "opacity-0");
+        setTimeout(() => {
+          toast.classList.add("translate-y-[-150%]", "opacity-0");
+        }, 3000);
+      }
+    </script>
+  </body>
+</html>
